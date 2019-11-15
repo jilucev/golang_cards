@@ -3,7 +3,10 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"math/rand"
+	"os"
 	"strings"
+	"time"
 )
 
 // Create new type of 'deck'
@@ -53,4 +56,27 @@ func (d deck) saveToFile(filename string) error {
 	// the last argument defines permissions to create that file
 	// 0666 means that anyone can do that.
 	return ioutil.WriteFile(filename, []byte(d.toString()), 0666)
+}
+
+func newDeckFromFile(filename string) deck {
+	byteSlice, err := ioutil.ReadFile(filename)
+	if err != nil {
+		fmt.Println("Error: ", err)
+		// 0 means no error by convention
+		os.Exit(1)
+	}
+
+	stringSlice := strings.Split(string(byteSlice), ",")
+
+	return deck(stringSlice)
+}
+
+func (d deck) shuffle() {
+	for index := range d {
+		r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+		newPosition := r.Intn(len(d) - 1)
+		// swap the positions
+		d[index], d[newPosition] = d[newPosition], d[index]
+	}
 }
